@@ -9,8 +9,24 @@ class cfg:
     """
 
     debug : bool = False
-    benchmark_fn = lambda x,y: (x**2 + y -11.0)**2 + (x + y**2 -7.0)**2 # Himmelblau
-    benchmark_range : tuple[float,float] = (-5.0,5.0)
+    benchmark : dict = {
+                        "dejong":(
+                                lambda x,y: x**2 + y**2,
+                                (-5.12,5.12),
+                            ),
+                        "himmelbleu":(
+                            lambda x,y: (x**2 + y -11.0)**2 + (x + y**2 -7.0)**2,
+                            (-5.0,5.0),
+                        ),
+                        "ackley":(
+                            lambda x,y: -20.0*np.e**(-0.2*np.sqrt(0.5*(x**2 + y**2))) - np.e**(0.5*(np.cos(2.0*np.pi*x)+np.cos(2.0*np.pi*y))) + np.e + 20.0,
+                            (-2.0,2.0),
+                        ),
+                        "eggcrate":(
+                            lambda x,y: x**2 + y**2 + 25.0*(np.sin(x)*np.sin(x) + np.sin(y)*np.sin(y)),
+                            (-5.0,5.0),
+                        ),
+                        }
     f_range : tuple[float,float] = (0.0,1.0)
     hp : dict = {
                 "entities":10 if debug else 100,
@@ -20,6 +36,7 @@ class cfg:
                 "sleep_rate":1e-12 if debug else 1e-6,
                 "verbose":False if debug else True,
                 "boundaries":"closed",
+                # "benchmark_fn"
                 }
     plot_params : dict = {
                         "color":"#FF0000",
@@ -43,18 +60,19 @@ class BatColony:
                 timesteps : int = None,
                 alpha : float = None,
                 gamma : float = None,
+                benchmark_fn : str = None,
                 sleep_rate : float = None,
-                verbose : bool = None,
-                random_state : int = None,
                 boundaries : str = None,
+                random_state : int = None,
+                verbose : bool = None,
                 ) -> None:
     
         self.entities = entities if entities else cfg.hp["entities"]
         self.timesteps = timesteps if timesteps else cfg.hp["timesteps"]
         self.c_alpha = alpha if alpha else cfg.hp["alpha"]
         self.c_gamma = gamma if gamma else cfg.hp["gamma"]
+        self.benchmark_fn = cfg.benchmark[benchmark_fn] if benchmark_fn else cfg.benchmark["dejong"]
         self.sleep_rate = sleep_rate if sleep_rate else cfg.hp["sleep_rate"]
-        self.verbose = verbose if verbose else cfg.hp["verbose"]
         self.boundaries = boundaries if boundaries else cfg.hp["boundaries"]
 
         self.__validate_args()
@@ -67,17 +85,17 @@ class BatColony:
         self.loudness = np.ones((self.entities,))
         self.pulse_rate = np.zeros((self.entities,))
 
-        self.__objective = cfg.benchmark_fn
+        self.__objective = self.benchmark_fn[0]
 
         if random_state: np.random.seed(random_state)
-
+        self.verbose = verbose
         self.position = None
 
     def fill(self,) -> None:
 
         self.position = np.random.uniform(
-                                        cfg.benchmark_range[0],
-                                        cfg.benchmark_range[1],
+                                        self.benchmark_fn[1][0],
+                                        self.benchmark_fn[1][1],
                                         (self.entities,self._dimensions),
                                         )
 
@@ -85,15 +103,15 @@ class BatColony:
 
         fig = plt.figure()
         plt.style.use("ggplot")
-        ax = plt.axes(xlim=cfg.benchmark_range,ylim=cfg.benchmark_range)
+        ax = plt.axes(xlim=self.benchmark_fn[1],ylim=self.benchmark_fn[1])
         X,Y = np.meshgrid(
                             np.linspace(
-                                    cfg.benchmark_range[0],
-                                    cfg.benchmark_range[1],
+                                    self.benchmark_fn[1][0],
+                                    self.benchmark_fn[1][1],
                                     1000),
                             np.linspace(
-                                    cfg.benchmark_range[0],
-                                    cfg.benchmark_range[1],
+                                    self.benchmark_fn[1][0],
+                                    self.benchmark_fn[1][1],
                                     1000),
                             )
         contour = ax.contourf(
@@ -112,7 +130,7 @@ class BatColony:
 
     def __validate_args(self,) -> None:
 
-        attributes = [attr for attr in vars(self).keys() if attr not in ["boundaries"]]
+        attributes = [attr for attr in vars(self).keys() if attr not in ["boundaries","benchmark_fn"]]
         for x in attributes: assert getattr(self,x) > 0, "Values cannot be non-negative."
 
     def __get_fitness(self,
@@ -128,8 +146,8 @@ class BatColony:
                             arr : np.array,
                             mode : str,
                             ) -> None:
-        L = cfg.benchmark_range[0]
-        H = cfg.benchmark_range[1]
+        L = self.benchmark_fn[1][0]
+        H = self.benchmark_fn[1][1]
 
         if mode == "closed":
             arr[arr < L] = L
