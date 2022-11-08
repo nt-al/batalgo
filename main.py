@@ -12,16 +12,17 @@ if __name__ == "__main__":
 
     from utils import BatColony
 
-    config = {
+    example = {
                 "entities":15,
                 "timesteps":10,
                 "alpha":0.9,
                 "gamma":0.9,
-                "verbose":True,
+                "benchmark_fn":"dejong",
                 "random_state":2036,
                 "sleep_rate":1e-10,
+                "verbose":True,
             }
 
-    bats = BatColony(**config)
+    bats = BatColony(**example)
     bats.fill()
     bats.run()
