@@ -36,7 +36,6 @@ class cfg:
                 "sleep_rate":1e-12 if debug else 1e-6,
                 "verbose":False if debug else True,
                 "boundaries":"closed",
-                # "benchmark_fn"
                 }
     plot_params : dict = {
                         "color":"#FF0000",
