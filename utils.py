@@ -14,7 +14,7 @@ class cfg:
                                 lambda x,y: x**2 + y**2,
                                 (-5.12,5.12),
                             ),
-                        "himmelbleu":(
+                        "himmelblau":(
                             lambda x,y: (x**2 + y -11.0)**2 + (x + y**2 -7.0)**2,
                             (-5.0,5.0),
                         ),
@@ -41,7 +41,7 @@ class cfg:
                         "color":"#FF0000",
                         "alpha":0.7,
                         "marker":"o",
-                        "s":100,
+                        "s":20,
                         "edgecolors":"#000000",
                         }
     contour_cmap = matplotlib.cm.Greys_r
