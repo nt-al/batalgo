@@ -18,7 +18,7 @@ if __name__ == "__main__":
                 "alpha":0.9,
                 "gamma":0.9,
                 "benchmark_fn":"dejong",
-                "random_state":2036,
+                "random_state":2036, # [2036,2036,None,800,]
                 "sleep_rate":1e-10,
                 "verbose":True,
             }
