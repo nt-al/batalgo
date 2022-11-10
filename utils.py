@@ -70,7 +70,10 @@ class BatColony:
         self.timesteps = timesteps if timesteps else cfg.hp["timesteps"]
         self.c_alpha = alpha if alpha else cfg.hp["alpha"]
         self.c_gamma = gamma if gamma else cfg.hp["gamma"]
-        self.benchmark_fn = cfg.benchmark[benchmark_fn] if benchmark_fn else cfg.benchmark["dejong"]
+        
+        try: self.benchmark_fn = cfg.benchmark[benchmark_fn] if benchmark_fn else cfg.benchmark["dejong"]
+        except: raise ValueError(f"Function '{benchmark_fn}' is not supported.")
+        
         self.sleep_rate = sleep_rate if sleep_rate else cfg.hp["sleep_rate"]
         self.boundaries = boundaries if boundaries else cfg.hp["boundaries"]
 
